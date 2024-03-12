@@ -5,6 +5,7 @@
  */
 
 #include "adc_spi.h"
+#include "if_table.h"
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
 #include "reference_freq.h"
@@ -47,8 +48,17 @@ void adc_test() {
 	const uint8_t half_voltage = static_cast<uint8_t>(3.3/2 * 0xff/3.3);
 	const double sampling_rate = 1.0965e6; // in Hz
 
+	// create an intermediate frequency reference at 455 kHz
+	const if_lookup_table<int8_t, buffer_length> if_table(
+		1.0, 455.0e3, sampling_rate
+	);
+
 	while (true) {
 		adc.start();
+
+		for (size_t i = 0; i < buffer_length; ++i) {
+
+		}
 
 		int64_t index_diff_sum = 0;
 		size_t zero_crossings = 0;
@@ -71,11 +81,11 @@ void adc_test() {
 			sampling_rate/(index_diff_average*2);
 
 		auto start_of_free = get_absolute_time();
-
 		adc.wait(true);
 		int64_t free_time = absolute_time_diff_us(
 			start_of_free, get_absolute_time()
 		);
+
 		printf(
 			"\e[G\e[Kaverage freq: %0.3f kHz"
 			"; free time: %ld us",
