@@ -2,6 +2,12 @@
 more description to come!
 
 ## getting started
+make sure you have the right stuff installed. on linux (or in wsl):
+```bash
+sudo apt update
+sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
+```
+
 clone the repo, change directory into it, then:
 ```bash
 cd pico-sdk/
