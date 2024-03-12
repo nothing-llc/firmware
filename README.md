@@ -10,6 +10,7 @@ sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
 
 clone the repo, change directory into it, then:
 ```bash
+git submodule update --init
 cd pico-sdk/
 git submodule update --init
 ```
