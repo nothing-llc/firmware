@@ -2,7 +2,7 @@
 
 #include "hardware/pwm.h"
 
-constexpr const static float clock_speed_mhz = 125;
+constexpr const static float clock_speed_mhz = 125; // XXX
 constexpr const static int pll_divider = 16;
 
 static uint slice;
