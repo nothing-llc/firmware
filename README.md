@@ -33,4 +33,4 @@ picotool load -f firmware.elf
 (you will, of course, need [`picotool`]).
 
 [the getting started guide]: https://datasheets.raspberrypi.com/pico/getting-started-with-pico.pdf
-[picotool]: https://github.com/raspberrypi/picotool
+[`picotool`]: https://github.com/raspberrypi/picotool
