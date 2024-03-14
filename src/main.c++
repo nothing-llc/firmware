@@ -113,7 +113,7 @@ void audio_test() {
 
 	// create an "intermediate frequency" reference at 440 Hz
 	const if_lookup_table<uint32_t, buffer_length> if_table(
-		120, 440, sampling_rate, 127
+		120, 110, sampling_rate, 127
 	);
 
 	// set up the audio output jack
