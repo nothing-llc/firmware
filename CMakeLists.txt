@@ -12,6 +12,7 @@ add_executable(firmware
 	src/main.c++
 	src/reference_freq.c++
 	src/output_filter.c++
+	src/audio_out.c++
 )
 
 pico_enable_stdio_usb(firmware 1)

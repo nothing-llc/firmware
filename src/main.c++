@@ -5,6 +5,7 @@
  */
 
 #include "adc_spi.h"
+#include "audio_out.h"
 #include "if_table.h"
 #include "output_filter.h"
 #include "pico/binary_info.h"
@@ -106,12 +107,33 @@ void pwm_test() {
 	}
 }
 
+void audio_test() {
+	const double sampling_rate = 44.1e3; // in Hz
+	const size_t buffer_length = 10023;
+
+	// create an "intermediate frequency" reference at 440 Hz
+	const if_lookup_table<uint32_t, buffer_length> if_table(
+		120, 440, sampling_rate, 127
+	);
+
+	// set up the audio output jack
+	const uint audio_pin = 22;
+	audio_out a(audio_pin, sampling_rate);
+
+	// play it
+	while (true) {
+		a.play(if_table.table.data(), buffer_length);
+		a.wait();
+	}
+}
+
 int main() {
 	annotate_program();
 	stdio_init_all();
 
-	adc_test();
+//	adc_test();
 //	pwm_test();
+	audio_test();
 
 	for (;;) tight_loop_contents();
 }

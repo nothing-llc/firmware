@@ -14,9 +14,11 @@
 #include <cstddef>
 
 template<typename data_type, size_t buffer_length>
-class if_lookup_table {
-public:
-	if_lookup_table(double scale, double freq, double sampling_rate);
+struct if_lookup_table {
+	if_lookup_table(
+		double scale, double freq, double sampling_rate,
+		double offset = 0
+	);
 
 	inline data_type& operator[] (size_t i) {
 		return table[i];
@@ -26,19 +28,18 @@ public:
 		return table[i];
 	}
 
-private:
 	std::array<data_type, buffer_length> table;
 };
 
 template<typename data_type, size_t buffer_length>
 if_lookup_table<data_type, buffer_length>::if_lookup_table(
-	double scale, double freq, double sampling_rate
+	double scale, double freq, double sampling_rate, double offset
 ) {
 	const double digital_freq = 2*M_PI*freq/sampling_rate;
 
 	for (size_t i = 0; i < buffer_length; ++i) {
 		table[i] = static_cast<data_type>(
-			scale*std::sin(digital_freq*i)
+			scale*std::sin(digital_freq*i) + offset
 		);
 	}
 }
