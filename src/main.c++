@@ -109,12 +109,21 @@ void pwm_test() {
 
 void audio_test() {
 	const double sampling_rate = 44.1e3; // in Hz
-	const size_t buffer_length = 10023;
+	const size_t buffer_length = 20046;
 
-	// create an "intermediate frequency" reference at 440 Hz
-	const if_lookup_table<uint32_t, buffer_length> if_table(
-		120, 110, sampling_rate, 127
+	// create a fifth around 110 Hz
+	const if_lookup_table<uint32_t, buffer_length> root(
+		60, 110, sampling_rate
 	);
+
+	const if_lookup_table<uint32_t, buffer_length> fifth(
+		45, 110*3.0/2, sampling_rate
+	);
+
+	std::array<uint32_t, buffer_length> chord;
+	for (size_t i = 0; i < buffer_length; ++i) {
+		chord[i] = root[i] + fifth[i] + 60;
+	}
 
 	// set up the audio output jack
 	const uint audio_pin = 22;
@@ -122,7 +131,7 @@ void audio_test() {
 
 	// play it
 	while (true) {
-		a.play(if_table.table.data(), buffer_length);
+		a.play(chord.data(), buffer_length);
 		a.wait();
 	}
 }
