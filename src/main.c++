@@ -5,7 +5,9 @@
  */
 
 #include "adc_spi.h"
+#include "audio_out.h"
 #include "if_table.h"
+#include "output_filter.h"
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
 #include "reference_freq.h"
@@ -44,6 +46,8 @@ void adc_test() {
 		PICO_DEFAULT_SPI_RX_PIN,
 		PICO_DEFAULT_SPI_SCK_PIN
 	);
+	std::array<int8_t, buffer_length> mult_with_if;
+	std::array<int8_t, buffer_length> filtered;
 
 	const uint8_t half_voltage = static_cast<uint8_t>(3.3/2 * 0xff/3.3);
 	const double sampling_rate = 1.0965e6; // in Hz
@@ -56,30 +60,20 @@ void adc_test() {
 	while (true) {
 		adc.start();
 
+		// multiply by the IF frequency and filter
 		for (size_t i = 0; i < buffer_length; ++i) {
-
+			mult_with_if[i] = adc[i]*if_table[i];
 		}
+		if_filter(mult_with_if.data(), filtered.data(), buffer_length);
 
-		int64_t index_diff_sum = 0;
-		size_t zero_crossings = 0;
-
-		size_t last_index = 0;
-		bool sign = std::signbit(adc[0] - half_voltage);
-		for (size_t i = 1; i < buffer_length - 1; i += 2) {
-			// watch for zero crossings and record them
-			if (sign ^ std::signbit(adc[i] - half_voltage)) {
-				sign = !sign;
-				index_diff_sum += i - last_index;
-				last_index = i;
-				++zero_crossings;
-			}
+		// take a sum (because yeah)
+		long int sum = 0;
+		for (size_t i = 0; i < buffer_length; ++i) {
+			sum += mult_with_if[i];
 		}
+		volatile long int dont_optimize = sum + 1;
 
-		const double index_diff_average =
-			static_cast<double>(index_diff_sum)/zero_crossings;
-		const double freq_average =
-			sampling_rate/(index_diff_average*2);
-
+		// see how much free time we have
 		auto start_of_free = get_absolute_time();
 		adc.wait(true);
 		int64_t free_time = absolute_time_diff_us(
@@ -89,7 +83,7 @@ void adc_test() {
 		printf(
 			"\e[G\e[Kaverage freq: %0.3f kHz"
 			"; free time: %ld us",
-			freq_average/1e3, free_time
+			0.0f, free_time
 		);
 	}
 }
@@ -113,12 +107,42 @@ void pwm_test() {
 	}
 }
 
+void audio_test() {
+	const double sampling_rate = 455e3; // in Hz
+	const size_t buffer_length = 8273;
+
+	// create a fifth around 110 Hz
+	const if_lookup_table<uint32_t, buffer_length> root(
+		60, 110, sampling_rate
+	);
+
+	const if_lookup_table<uint32_t, buffer_length> fifth(
+		45, 110*3.0/2, sampling_rate
+	);
+
+	std::array<uint32_t, buffer_length> chord;
+	for (size_t i = 0; i < buffer_length; ++i) {
+		chord[i] = root[i] + fifth[i] + 60;
+	}
+
+	// set up the audio output jack
+	const uint audio_pin = 22;
+	audio_out a(audio_pin, sampling_rate);
+
+	// play it
+	while (true) {
+		a.play(chord.data(), buffer_length);
+		a.wait();
+	}
+}
+
 int main() {
 	annotate_program();
 	stdio_init_all();
 
-	adc_test();
+//	adc_test();
 //	pwm_test();
+	audio_test();
 
 	for (;;) tight_loop_contents();
 }
