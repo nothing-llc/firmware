@@ -108,8 +108,8 @@ void pwm_test() {
 }
 
 void audio_test() {
-	const double sampling_rate = 44.1e3; // in Hz
-	const size_t buffer_length = 20046;
+	const double sampling_rate = 455e3; // in Hz
+	const size_t buffer_length = 8273;
 
 	// create a fifth around 110 Hz
 	const if_lookup_table<uint32_t, buffer_length> root(
