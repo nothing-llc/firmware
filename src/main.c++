@@ -38,6 +38,10 @@ void annotate_program() {
 void adc_test() {
 	// get ready for spi
 	const size_t buffer_length = 17544; // XXX: for an integer # of cycles
+	const size_t audio_extra = 77;
+	const size_t audio_length = buffer_length/4 + audio_extra;
+	const size_t extra_hop = buffer_length/4 / audio_extra;
+
 	const uint baud = 21e6; // 20.8 MHz spi clock ⇒ 1.0965 MHz sample rate
 	adc_spi<buffer_length> adc(
 		spi_default,
@@ -48,8 +52,8 @@ void adc_test() {
 	);
 	std::array<int8_t, buffer_length> mult_with_if;
 	std::array<int8_t, buffer_length> filtered;
-	std::array<uint32_t, buffer_length/4> audio_buffer_1;
-	std::array<uint32_t, buffer_length/4> audio_buffer_2;
+	std::array<uint32_t, audio_length + 33> audio_buffer_1;
+	std::array<uint32_t, audio_length + 33> audio_buffer_2;
 
 	const uint8_t half_voltage = static_cast<uint8_t>(3.3/2 * 0xff/3.3);
 	const double sampling_rate = 1.0965e6; // in Hz
@@ -63,30 +67,37 @@ void adc_test() {
 	const uint audio_pin = 22;
 	audio_out a(audio_pin, sampling_rate/4);
 
-	auto& current_buffer = audio_buffer_1;
+	auto* current_buffer = &audio_buffer_1;
 	bool buffer_1 = true;
 
 	while (true) {
+		a.play(current_buffer->data(), audio_length);
 		adc.start();
-		a.play(current_buffer.data(), buffer_length/4);
 
 		if (buffer_1) {
-			current_buffer = audio_buffer_2;
+			current_buffer = &audio_buffer_2;
 		} else {
-			current_buffer = audio_buffer_1;
+			current_buffer = &audio_buffer_1;
 		}
 		buffer_1 = !buffer_1;
 
-		sleep_ms(10000);
-
 		// multiply by the IF frequency and filter
+		size_t audio_i = 0;
+		size_t hop_counter = 0;
+		size_t total_hops = 0;
 		for (size_t i = 0; i < buffer_length; ++i) {
-			printf("%d\n", adc[i]);
-			continue;
-			mult_with_if[i] = (adc[i] - 127)*if_table[i];
-			current_buffer[i/4] = mult_with_if[i] + 127;
+			mult_with_if[i] = (adc[i] - 127); // *if_table[i] >> 4;
+			auto next_out = 2*abs(mult_with_if[i]) + 90;
+			if (i % 4 == 0) {
+				(*current_buffer)[audio_i++] = next_out;
+				if (hop_counter == extra_hop) {
+					(*current_buffer)[audio_i++] = next_out;
+					hop_counter = 0;
+					++total_hops;
+				}
+				++hop_counter;
+			}
 		}
-		return;
 		if_filter(mult_with_if.data(), filtered.data(), buffer_length);
 
 		// take a sum (because yeah)
@@ -97,18 +108,20 @@ void adc_test() {
 		volatile long int dont_optimize = sum + 1;
 
 		// see how much free time we have
+		a.wait();
 		auto start_of_free = get_absolute_time();
 		adc.wait(true);
-		a.wait();
 		int64_t free_time = absolute_time_diff_us(
 			start_of_free, get_absolute_time()
 		);
 
-		printf(
-			"\e[G\e[K"
-			"free time: %lld us",
-			free_time
-		);
+//		printf(
+//			"\e[G\e[K"
+//			"free time: %lld us"
+//			"; hops: %zu"
+//			"; index: %zu/%zu",
+//			free_time, total_hops, audio_i, audio_length
+//		);
 	}
 }
 

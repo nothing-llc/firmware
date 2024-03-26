@@ -50,10 +50,10 @@ public:
 	inline void start();
 
 	// wait to finish reading
-	inline void wait(bool switch_rx = true) {
-		dma_channel_wait_for_finish_blocking(rx_channel);
-		if (switch_rx) switch_rx_buffer();
-	}
+	inline void wait(bool switch_rx = true);
+
+	// abort the current read
+//	inline void stop(bool switch_rx = true);
 
 private:
 	spi_inst_t* spi;
@@ -122,6 +122,21 @@ void adc_spi<buffer_length>::start() {
 	dma_start_channel_mask((1u << tx_channel) | (1u << rx_channel));
 }
 
+template<size_t buffer_length>
+void adc_spi<buffer_length>::wait(bool switch_rx) {
+	dma_channel_wait_for_finish_blocking(rx_channel);
+	if (switch_rx) switch_rx_buffer();
+}
+
+//template<size_t buffer_length>
+//void adc_spi<buffer_length>::stop(bool switch_rx) {
+//	dma_channel_abort(tx_channel);
+//	dma_channel_abort(rx_channel);
+//	wait(switch_rx);
+//}
+
+/*---------------------------------------------------------------------------*/
+
 template <size_t buffer_length>
 void adc_spi<buffer_length>::dma_channel_init(
 	int& channel,
@@ -146,8 +161,6 @@ void adc_spi<buffer_length>::dma_channel_init(
 
 	// note: config is not written until we actually start!
 }
-
-
 
 template <size_t buffer_length>
 inline void adc_spi<buffer_length>::rewind_tx() {
