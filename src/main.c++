@@ -81,9 +81,9 @@ void adc_test() {
 		);
 
 		printf(
-			"\e[G\e[Kaverage freq: %0.3f kHz"
-			"; free time: %ld us",
-			0.0f, free_time
+			"\e[G\e[K"
+			"free time: %lld us",
+			free_time
 		);
 	}
 }
@@ -140,9 +140,9 @@ int main() {
 	annotate_program();
 	stdio_init_all();
 
-//	adc_test();
+	adc_test();
 //	pwm_test();
-	audio_test();
+//	audio_test();
 
 	for (;;) tight_loop_contents();
 }
