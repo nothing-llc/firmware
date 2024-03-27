@@ -86,8 +86,8 @@ void adc_test() {
 		size_t hop_counter = 0;
 		size_t total_hops = 0;
 		for (size_t i = 0; i < buffer_length; ++i) {
-			mult_with_if[i] = (adc[i] - 127); // *if_table[i] >> 4;
-			auto next_out = 2*abs(mult_with_if[i]) + 90;
+			mult_with_if[i] = (adc[i] - 127)*if_table[i] >> 4;
+			auto next_out = abs(adc[i] - 127) + 127; //mult_with_if[i] + 127;
 			if (i % 4 == 0) {
 				(*current_buffer)[audio_i++] = next_out;
 				if (hop_counter == extra_hop) {
@@ -99,13 +99,6 @@ void adc_test() {
 			}
 		}
 		if_filter(mult_with_if.data(), filtered.data(), buffer_length);
-
-		// take a sum (because yeah)
-		long int sum = 0;
-		for (size_t i = 0; i < buffer_length; ++i) {
-			sum += mult_with_if[i];
-		}
-		volatile long int dont_optimize = sum + 1;
 
 		// see how much free time we have
 		a.wait();
