@@ -9,19 +9,22 @@ set(CMAKE_CXX_STANDARD 17)
 
 pico_sdk_init()
 add_executable(firmware
-	src/main.c++
-	src/reference_freq.c++
-	src/output_filter.c++
-	src/audio_out.c++
+	src/ssd1305.c++
 )
+
+# unfortunately these have to be up here... ok
+add_compile_definitions(
+	TEENSYDUINO
+	ARDUINO=100
+	PROGMEM=
+)
+add_subdirectory(lib/)
 
 pico_enable_stdio_usb(firmware 1)
 pico_enable_stdio_uart(firmware 1)
 pico_add_extra_outputs(firmware)
 
 target_link_libraries(firmware
-	hardware_dma
-	hardware_pwm
-	hardware_spi
 	pico_stdlib
+	adafruit-ssd1305
 )
