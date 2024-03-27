@@ -38,7 +38,7 @@ void annotate_program() {
 void adc_test() {
 	// get ready for spi
 	const size_t buffer_length = 17544; // XXX: for an integer # of cycles
-	const size_t audio_extra = 77;
+	const size_t audio_extra = 77; // XXX: so that we don't underrun
 	const size_t audio_length = buffer_length/4 + audio_extra;
 	const size_t extra_hop = buffer_length/4 / audio_extra;
 
