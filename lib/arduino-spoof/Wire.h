@@ -4,21 +4,22 @@
 #include "Arduino.h" // lol
 
 class TwoWire {
-	// TODO
 public:
-	TwoWire() = default;
+	TwoWire();
 
-	void begin(uint8_t address = 0) {}
-	void end() {}
-	void beginTransmission(uint8_t address) {}
-	int endTransmission(bool stop = true) { return 0; }
+	void begin(uint8_t address = 0);
+	void end();
+	void beginTransmission(uint8_t address);
+	int endTransmission(bool stop = true);
 
-	size_t write(const uint8_t* buffer, size_t length) { return 0; }
-	uint8_t read() { return 0; }
+	size_t write(const uint8_t* buffer, size_t length);
+	uint8_t read();
 
 	size_t requestFrom(
-		uint8_t address, size_t quantity, bool stop = true
-	) { return 0; }
+		uint8_t address,
+		size_t quantity,
+		bool stop = true
+	);
 };
 
 extern TwoWire Wire;
