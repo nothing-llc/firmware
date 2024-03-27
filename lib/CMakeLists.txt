@@ -10,6 +10,8 @@ target_include_directories(arduino-spoof PUBLIC
 
 target_link_libraries(arduino-spoof
 	pico_stdlib
+	hardware_gpio
+	hardware_i2c
 )
 
 add_library(adafruit-busio
