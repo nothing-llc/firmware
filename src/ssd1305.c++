@@ -9,6 +9,7 @@
 
 #include "Wire.h"
 #include "Adafruit_SSD1305.h"
+#include "Fonts/FreeMono9pt7b.h"
 
 #define OLED_RESET 9 // whatever
 
@@ -23,7 +24,8 @@ void display_test() {
 	}
 
 	display.clearDisplay();   // clears the screen and buffer
-	display.drawPixel(10, 10, WHITE);
+	display.setFont(&FreeMono9pt7b);
+	display.drawChar(64, 32, 'e', WHITE, BLACK, 3);
 	display.display();
 }
 
