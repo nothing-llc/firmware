@@ -1,6 +1,6 @@
 /*
  * test of I²C SSD1305 display, through manipulated Adafruit libraries.
- * 
+ *
  * copyright (c) 2024  catherine van west <catherine.vanwest@cooper.edu>
  */
 
@@ -22,16 +22,9 @@ void display_test() {
 		return;
 	}
 
-	// init done
-	display.display(); // show splashscreen
-	sleep_ms(1000);
-	display.clearDisplay(); // clears the screen and buffer
-
-	// draw a single pixel
+	display.clearDisplay();   // clears the screen and buffer
 	display.drawPixel(10, 10, WHITE);
 	display.display();
-	sleep_ms(1000);
-	display.clearDisplay();
 }
 
 int main() {
