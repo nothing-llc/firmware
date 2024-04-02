@@ -59,9 +59,13 @@ void adc_test() {
 	const double sampling_rate = 1.0965e6; // in Hz
 
 	// create an intermediate frequency reference at 455 kHz
-	const if_lookup_table<int8_t, buffer_length> if_table(
+	const size_t one_cycle = static_cast<size_t>(sampling_rate/455.0e3);
+	const if_lookup_table<
+		int8_t, 2*buffer_length
+	> if_table(
 		25.0, 455.0e3, sampling_rate
 	);
+	size_t start_index = 0;
 
 	// set up the audio output jack
 	const uint audio_pin = 22;
@@ -86,7 +90,7 @@ void adc_test() {
 		size_t hop_counter = 0;
 		size_t total_hops = 0;
 		for (size_t i = 0; i < buffer_length; ++i) {
-			mult_with_if[i] = (adc[i] - 127)*if_table[i] >> 4;
+			mult_with_if[i] = (adc[i] - 127)*if_table[i + start_index] >> 4;
 			auto next_out = abs(adc[i] - 127) + 127; //mult_with_if[i] + 127;
 			if (i % 4 == 0) {
 				(*current_buffer)[audio_i++] = next_out;
@@ -115,6 +119,8 @@ void adc_test() {
 //			"; index: %zu/%zu",
 //			free_time, total_hops, audio_i, audio_length
 //		);
+
+		start_index = (start_index + 0) % (10*one_cycle);
 	}
 }
 
