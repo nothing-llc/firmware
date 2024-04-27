@@ -68,7 +68,7 @@ void adc_test() {
 	size_t start_index = 0;
 
 	// set up the audio output jack
-	const uint audio_pin = 22;
+	const uint audio_pin = 14;
 	audio_out a(audio_pin, sampling_rate/4);
 
 	auto* current_buffer = &audio_buffer_1;
@@ -125,22 +125,15 @@ void adc_test() {
 }
 
 void pwm_test() {
+	sleep_ms(2e3);
+
+	float freq = 14.000 - 0.455;
 	reference_freq::mostly_configure();
-	reference_freq::set_mhz(14.000);
-
-	float freq = 14.000;
-	while (true) {
-		freq += .01;
-		if (freq > 14.350) freq = 14.000;
-
-		reference_freq::set_mhz(freq);
-		printf(
-			"now running at %.3f (%.3f) MHz\n",
-			freq, reference_freq::actual_freq(freq)
-		);
-
-		sleep_ms(10e3);
-	}
+	reference_freq::set_mhz(freq);
+	printf(
+		"now running at %.3f (%.3f) MHz\n",
+		freq, reference_freq::actual_freq(freq)
+	);
 }
 
 void audio_test() {
@@ -176,8 +169,8 @@ int main() {
 	annotate_program();
 	stdio_init_all();
 
+	pwm_test();
 	adc_test();
-//	pwm_test();
 //	audio_test();
 
 	for (;;) tight_loop_contents();
