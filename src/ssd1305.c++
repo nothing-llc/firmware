@@ -25,7 +25,12 @@ void display_test() {
 
 	display.clearDisplay();   // clears the screen and buffer
 	display.setFont(&FreeMono9pt7b);
-	display.drawChar(64, 32, 'e', WHITE, BLACK, 3);
+//	display.drawChar(20, 20, 't', WHITE, BLACK, 1);
+	display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(20,20);
+//	display.drawPixel(20, 20, WHITE);
+	display.println("test");
 	display.display();
 }
 
